@@ -1,0 +1,872 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Team Weekly Game</title>
+<style>
+/* All styles scoped to #tgame so Confluence CSS can't interfere */
+#tgame, #tgame * { box-sizing: border-box; margin: 0; padding: 0; }
+
+#tgame {
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif !important;
+  color: #172b4d !important;
+  background: #eef0f8 !important;
+  padding: 16px;
+  max-width: 660px;
+  margin: 0 auto;
+  line-height: 1.45;
+  border-radius: 12px;
+}
+
+/* ── Header ─── */
+#tgame .hdr {
+  background: linear-gradient(135deg, #0052cc 0%, #2684ff 100%) !important;
+  border-radius: 10px;
+  padding: 16px 20px;
+  margin-bottom: 12px;
+  color: #fff !important;
+}
+#tgame .hdr h1 {
+  font-size: 1.35rem !important;
+  font-weight: 800 !important;
+  color: #fff !important;
+  letter-spacing: -0.02em;
+  margin-bottom: 2px;
+}
+#tgame .hdr .sub {
+  font-size: 0.82rem !important;
+  color: rgba(255,255,255,0.82) !important;
+  font-weight: 400 !important;
+}
+
+/* ── Cards ─── */
+#tgame .card {
+  background: #fff !important;
+  border-radius: 10px !important;
+  padding: 16px 18px !important;
+  margin-bottom: 10px !important;
+  box-shadow: 0 2px 8px rgba(0,40,120,0.10), 0 1px 2px rgba(0,0,0,0.06) !important;
+  border: 1px solid #e4e8f0 !important;
+}
+
+/* ── Name row ─── */
+#tgame .player-row { display: flex !important; gap: 8px !important; align-items: center !important; }
+#tgame .player-row input {
+  flex: 1 !important;
+  padding: 9px 13px !important;
+  border: 2px solid #dde3f0 !important;
+  border-radius: 8px !important;
+  font-size: 0.95rem !important;
+  font-family: inherit !important;
+  color: #172b4d !important;
+  background: #f7f8fc !important;
+  outline: none !important;
+  transition: border-color 0.15s !important;
+}
+#tgame .player-row input:focus { border-color: #0052cc !important; background: #fff !important; }
+#tgame .name-hint { font-size: 0.76rem !important; color: #7a849c !important; margin-top: 6px !important; }
+
+/* ── Buttons ─── */
+#tgame .btn {
+  padding: 9px 18px !important;
+  border: none !important;
+  border-radius: 8px !important;
+  cursor: pointer !important;
+  font-size: 0.88rem !important;
+  font-weight: 700 !important;
+  white-space: nowrap !important;
+  font-family: inherit !important;
+  transition: transform 0.1s, box-shadow 0.1s !important;
+  display: inline-block !important;
+  text-decoration: none !important;
+}
+#tgame .btn:hover { transform: translateY(-1px) !important; box-shadow: 0 3px 8px rgba(0,0,0,0.15) !important; }
+#tgame .btn:active { transform: translateY(0) !important; }
+#tgame .btn-blue { background: #0052cc !important; color: #fff !important; }
+#tgame .btn-blue:hover { background: #0065ff !important; }
+#tgame .btn-ghost { background: #f0f2f8 !important; color: #3a4a6b !important; border: 1.5px solid #d8ddf0 !important; }
+#tgame .btn-ghost:hover { background: #e4e8f4 !important; }
+#tgame .btn-green { background: #00875a !important; color: #fff !important; }
+#tgame .btn-green:hover { background: #00a36a !important; }
+#tgame .btn-row { display: flex !important; gap: 8px !important; justify-content: center !important; flex-wrap: wrap !important; margin-top: 12px !important; }
+
+/* ── Game header ─── */
+#tgame .week-badge {
+  display: inline-block !important;
+  padding: 3px 10px !important;
+  border-radius: 20px !important;
+  font-size: 0.72rem !important;
+  font-weight: 800 !important;
+  background: #e3fcef !important;
+  color: #006644 !important;
+  margin-bottom: 8px !important;
+  letter-spacing: 0.03em !important;
+  text-transform: uppercase !important;
+}
+#tgame .game-title {
+  font-size: 1.2rem !important;
+  font-weight: 800 !important;
+  color: #0a1f44 !important;
+  margin-bottom: 3px !important;
+}
+#tgame .game-desc { color: #6b778c !important; font-size: 0.84rem !important; margin-bottom: 14px !important; }
+
+/* ── Score ─── */
+#tgame .score-panel {
+  text-align: center !important;
+  background: linear-gradient(135deg, #f0f4ff 0%, #e8f0ff 100%) !important;
+  border-radius: 10px !important;
+  padding: 18px 12px 14px !important;
+  border: 1px solid #c8d6f8 !important;
+  margin-top: 12px !important;
+}
+#tgame .score-num {
+  font-size: 3.4rem !important;
+  font-weight: 900 !important;
+  color: #0052cc !important;
+  line-height: 1 !important;
+  letter-spacing: -0.04em !important;
+}
+#tgame .score-lbl { color: #5a6a8a !important; font-size: 0.82rem !important; margin-top: 5px !important; }
+
+/* ── Leaderboard ─── */
+#tgame .lb-tabs { display: flex !important; gap: 4px !important; margin-bottom: 14px !important; }
+#tgame .lb-tab {
+  padding: 7px 16px !important;
+  border-radius: 8px !important;
+  border: none !important;
+  cursor: pointer !important;
+  font-size: 0.84rem !important;
+  font-weight: 700 !important;
+  font-family: inherit !important;
+  background: #f0f2f8 !important;
+  color: #6b778c !important;
+  transition: background 0.12s !important;
+}
+#tgame .lb-tab.active { background: #0052cc !important; color: #fff !important; }
+
+#tgame .lb-row {
+  display: flex !important;
+  align-items: center !important;
+  padding: 9px 4px !important;
+  border-bottom: 1px solid #f0f2f8 !important;
+  gap: 8px !important;
+}
+#tgame .lb-row:last-child { border-bottom: none !important; }
+#tgame .lb-rank { width: 28px !important; font-weight: 700 !important; color: #8893a8 !important; font-size: 0.88rem !important; }
+#tgame .lb-name { flex: 1 !important; font-weight: 500 !important; color: #1a2540 !important; font-size: 0.92rem !important; }
+#tgame .lb-name.me { color: #0052cc !important; font-weight: 800 !important; }
+#tgame .lb-score { font-weight: 800 !important; color: #0052cc !important; font-size: 1rem !important; }
+#tgame .lb-game { font-size: 0.68rem !important; color: #9aa5bc !important; }
+#tgame .lb-empty { text-align: center !important; color: #9aa5bc !important; padding: 20px !important; font-size: 0.88rem !important; }
+
+/* ── Notice ─── */
+#tgame .notice {
+  padding: 10px 14px !important;
+  border-radius: 8px !important;
+  font-size: 0.84rem !important;
+  margin-bottom: 10px !important;
+  background: #fffae6 !important;
+  border: 1.5px solid #ffe380 !important;
+  color: #5a4200 !important;
+}
+#tgame .loading { text-align: center !important; color: #9aa5bc !important; padding: 18px !important; font-size: 0.86rem !important; }
+
+/* ══ RUNNER ═══════════════════════════════════════════════ */
+#tgame canvas {
+  display: block !important;
+  border-radius: 10px !important;
+  border: 2px solid #dde3f0 !important;
+  background: #fff !important;
+  max-width: 100% !important;
+  box-shadow: 0 2px 12px rgba(0,40,120,0.08) !important;
+  margin: 0 auto !important;
+}
+#tgame .run-meta {
+  display: flex !important;
+  justify-content: space-between !important;
+  font-size: 0.8rem !important;
+  color: #7a849c !important;
+  margin: 6px 4px 8px !important;
+}
+#tgame .run-meta strong { color: #0052cc !important; }
+#tgame .run-hint { text-align: center !important; font-size: 0.76rem !important; color: #9aa5bc !important; margin-bottom: 8px !important; }
+
+/* ══ TYPING ════════════════════════════════════════════════ */
+#tgame .typing-target {
+  font-size: 1.05rem !important;
+  line-height: 1.85 !important;
+  background: #f7f8fc !important;
+  border: 1.5px solid #e4e8f0 !important;
+  padding: 12px 14px !important;
+  border-radius: 8px !important;
+  margin-bottom: 10px !important;
+  word-break: break-word !important;
+  color: #2a3a5c !important;
+}
+#tgame .ch.ok  { color: #00875a !important; }
+#tgame .ch.err { background: #ffebe6 !important; color: #bf1650 !important; border-radius: 2px !important; }
+#tgame .ch.cur { border-left: 2px solid #0052cc !important; }
+#tgame .typing-input {
+  width: 100% !important; padding: 9px 12px !important; font-size: 0.95rem !important;
+  border-radius: 8px !important; border: 2px solid #dde3f0 !important;
+  font-family: inherit !important; color: #172b4d !important; background: #f7f8fc !important;
+  outline: none !important;
+}
+#tgame .typing-input:focus { border-color: #0052cc !important; background: #fff !important; }
+#tgame .t-progress { font-size: 0.78rem !important; color: #9aa5bc !important; margin-bottom: 6px !important; font-weight: 600 !important; letter-spacing: 0.04em !important; text-transform: uppercase !important; }
+#tgame .t-stats { display: flex !important; gap: 16px !important; margin-top: 8px !important; font-size: 0.8rem !important; color: #7a849c !important; }
+#tgame .t-stats span { background: #f0f2f8 !important; padding: 3px 8px !important; border-radius: 4px !important; }
+
+/* ══ MEMORY ════════════════════════════════════════════════ */
+#tgame .memory-grid {
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px !important;
+  max-width: 290px !important;
+  margin: 0 auto 12px !important;
+}
+#tgame .mc {
+  aspect-ratio: 1 !important; border-radius: 10px !important; cursor: pointer !important;
+  user-select: none !important; perspective: 600px !important;
+}
+#tgame .mc-inner {
+  width: 100% !important; height: 100% !important; position: relative !important;
+  transform-style: preserve-3d !important; transition: transform 0.28s !important;
+}
+#tgame .mc.flipped .mc-inner, #tgame .mc.matched .mc-inner { transform: rotateY(180deg) !important; }
+#tgame .mc-front, #tgame .mc-back {
+  position: absolute !important; inset: 0 !important; border-radius: 10px !important;
+  display: flex !important; align-items: center !important; justify-content: center !important;
+  backface-visibility: hidden !important; font-size: 1.6rem !important;
+}
+#tgame .mc-front {
+  background: linear-gradient(135deg, #0052cc, #2684ff) !important;
+  color: #fff !important; font-size: 1rem !important; font-weight: 800 !important;
+  box-shadow: inset 0 -2px 0 rgba(0,0,0,0.15) !important;
+}
+#tgame .mc-back  { background: #e8f4ee !important; transform: rotateY(180deg) !important; }
+#tgame .mc.matched .mc-back { background: #f4f5f7 !important; cursor: default !important; opacity: 0.5 !important; }
+#tgame .mem-stats {
+  display: flex !important; gap: 0 !important; justify-content: center !important;
+  font-size: 0.8rem !important;
+}
+#tgame .mem-stats .stat {
+  padding: 4px 12px !important; background: #f0f2f8 !important;
+  color: #4a5a7a !important; font-weight: 600 !important;
+}
+#tgame .mem-stats .stat:first-child { border-radius: 6px 0 0 6px !important; }
+#tgame .mem-stats .stat:last-child  { border-radius: 0 6px 6px 0 !important; }
+#tgame .mem-stats .stat + .stat { border-left: 1px solid #dde3f0 !important; }
+
+/* ══ MATH ══════════════════════════════════════════════════ */
+#tgame .math-bar-wrap { height: 8px !important; background: #e4e8f0 !important; border-radius: 4px !important; overflow: hidden !important; margin-bottom: 8px !important; }
+#tgame .math-bar { height: 100% !important; background: #0052cc !important; transition: width 0.1s linear, background 0.4s !important; border-radius: 4px !important; }
+#tgame .math-counter { text-align: center !important; font-size: 0.8rem !important; color: #7a849c !important; margin-bottom: 4px !important; }
+#tgame .math-q {
+  text-align: center !important; font-size: 2.6rem !important; font-weight: 900 !important;
+  color: #0052cc !important; margin: 10px 0 !important; letter-spacing: -0.02em !important;
+}
+#tgame .math-input {
+  display: block !important; width: 130px !important; margin: 0 auto 8px !important;
+  padding: 9px !important; text-align: center !important; font-size: 1.4rem !important;
+  border: 2.5px solid #dde3f0 !important; border-radius: 8px !important;
+  font-family: inherit !important; color: #172b4d !important; background: #f7f8fc !important;
+  font-weight: 700 !important; outline: none !important;
+}
+#tgame .math-input:focus { border-color: #0052cc !important; background: #fff !important; }
+#tgame .math-fb { text-align: center !important; font-size: 1rem !important; font-weight: 700 !important; min-height: 1.5em !important; }
+#tgame .math-fb.ok  { color: #00875a !important; }
+#tgame .math-fb.err { color: #bf1650 !important; }
+
+/* ══ REACTION ══════════════════════════════════════════════ */
+#tgame .rx-dots { display: flex !important; justify-content: center !important; gap: 8px !important; margin-bottom: 14px !important; }
+#tgame .rx-dot { width: 14px !important; height: 14px !important; border-radius: 50% !important; background: #dde3f0 !important; transition: background 0.2s !important; }
+#tgame .rx-dot.done   { background: #36b37e !important; }
+#tgame .rx-dot.active { background: #0052cc !important; box-shadow: 0 0 0 3px rgba(0,82,204,0.2) !important; }
+
+#tgame .rx-circle {
+  width: 170px !important; height: 170px !important; border-radius: 50% !important;
+  margin: 0 auto 12px !important; display: flex !important; align-items: center !important;
+  justify-content: center !important; cursor: pointer !important; font-size: 0.9rem !important;
+  font-weight: 700 !important; user-select: none !important; text-align: center !important;
+  padding: 10px !important; transition: background 0.08s, transform 0.1s !important;
+  box-shadow: 0 4px 16px rgba(0,0,0,0.12) !important;
+}
+#tgame .rx-circle:hover:not(.done) { transform: scale(1.03) !important; }
+#tgame .rx-circle.idle    { background: #dde3f0 !important; color: #5a6a8a !important; }
+#tgame .rx-circle.waiting { background: #ff5630 !important; color: #fff !important; }
+#tgame .rx-circle.go      {
+  background: #36b37e !important; color: #fff !important; font-size: 1.5rem !important;
+  box-shadow: 0 4px 20px rgba(54,179,126,0.45) !important;
+}
+#tgame .rx-circle.done    { background: #f0f2f8 !important; color: #9aa5bc !important; cursor: default !important; }
+#tgame .rx-result { text-align: center !important; font-size: 0.86rem !important; color: #7a849c !important; min-height: 1.4em !important; }
+
+#tgame .hidden { display: none !important; }
+</style>
+</head>
+<body>
+
+<!-- ================================================================
+  CONFIG — paste your Google Apps Script web app URL below.
+================================================================ -->
+<script>
+const APPS_SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxxYzsilz4PNh56C12RuEWqUtq9L1IC-LsoSQmzBWrLTpJWJseTtuvVH0a4ywsq82_pzQ/exec';
+</script>
+<!-- ============================================================= -->
+
+<div id="tgame">
+
+  <!-- Header -->
+  <div class="hdr">
+    <h1>🎮 Team Weekly Game</h1>
+    <div class="sub" id="week-info"></div>
+  </div>
+
+  <div class="notice hidden" id="setup-notice">
+    ⚠️ <strong>Setup needed:</strong> Replace <code>YOUR_APPS_SCRIPT_URL_HERE</code> in this file with your Google Apps Script URL.
+  </div>
+
+  <!-- Player name -->
+  <div class="card">
+    <div class="player-row">
+      <input type="text" id="player-name" placeholder="Your name…" autocomplete="given-name" />
+      <button class="btn btn-ghost" onclick="showLeaderboard()">🏆 Leaderboard</button>
+    </div>
+    <div class="name-hint">Use the same name every week — it links your scores across the month.</div>
+  </div>
+
+  <!-- Game -->
+  <div class="card" id="game-card">
+    <div id="game-area"></div>
+  </div>
+
+  <!-- Leaderboard -->
+  <div class="card hidden" id="lb-card">
+    <div class="lb-tabs">
+      <button class="lb-tab active" onclick="switchTab('weekly')">This week</button>
+      <button class="lb-tab"       onclick="switchTab('monthly')">This month</button>
+    </div>
+    <div id="lb-content"><div class="loading">Loading…</div></div>
+  </div>
+
+</div><!-- #tgame -->
+
+<script>
+// ── Date ──────────────────────────────────────────────────────
+function isoWeek(d) {
+  const date = new Date(d);
+  date.setHours(0,0,0,0);
+  date.setDate(date.getDate() + 3 - (date.getDay() + 6) % 7);
+  const w1 = new Date(date.getFullYear(), 0, 4);
+  return 1 + Math.round(((date - w1) / 86400000 - 3 + (w1.getDay() + 6) % 7) / 7);
+}
+const NOW   = new Date();
+const WEEK  = isoWeek(NOW);
+const MONTH = NOW.getMonth() + 1;
+const YEAR  = NOW.getFullYear();
+const GAME  = (WEEK - 1) % 4;   // 0=Runner 1=Memory 2=Math 3=Reaction
+
+const GAME_INFO = [
+  { name: 'Dino Runner',   emoji: '🦕', desc: 'Jump over obstacles. Play as many times as you want — best score counts!' },
+  { name: 'Memory Match',  emoji: '🧠', desc: 'Flip cards to find all 8 matching pairs. Fewer flips and faster = more points.' },
+  { name: 'Math Blitz',    emoji: '🔢', desc: 'Answer as many arithmetic questions as you can in 60 seconds.' },
+  { name: 'Reaction Time', emoji: '⚡', desc: 'Click the circle the instant it turns green. 5 rounds — fastest average wins.' },
+];
+
+// ── State ─────────────────────────────────────────────────────
+let playerName = localStorage.getItem('tgame_name') || '';
+let lbTab = 'weekly';
+let weekBest = 0;
+
+// ── Boot ──────────────────────────────────────────────────────
+(function init() {
+  const inp = document.getElementById('player-name');
+  inp.value = playerName;
+  inp.addEventListener('input', () => {
+    playerName = inp.value.trim();
+    localStorage.setItem('tgame_name', playerName);
+  });
+  const g = GAME_INFO[GAME];
+  document.getElementById('week-info').textContent =
+    `Week ${WEEK} · ${g.emoji} ${g.name} · ${MONTH}/${YEAR}`;
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE')
+    document.getElementById('setup-notice').classList.remove('hidden');
+  renderGame();
+})();
+
+function renderGame() {
+  const area = document.getElementById('game-area');
+  const g    = GAME_INFO[GAME];
+  const hdr  = `<div class="week-badge">${g.emoji} Game ${GAME + 1} of 4 — week ${WEEK}</div>
+    <div class="game-title">${g.name}</div>
+    <div class="game-desc">${g.desc}</div>`;
+  switch (GAME) {
+    case 0: area.innerHTML = hdr + runnerHTML();  initRunner();  break;
+    case 1: area.innerHTML = hdr + memoryHTML();  initMemory();  break;
+    case 2: area.innerHTML = hdr + mathHTML();    initMath();    break;
+    case 3: area.innerHTML = hdr + reactionHTML(); initReaction(); break;
+  }
+}
+
+// ── Submit & Leaderboard ──────────────────────────────────────
+async function submitScore(score) {
+  if (APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    const name = playerName || 'Anonymous';
+    const url  = `${APPS_SCRIPT_URL}?action=submit`
+      + `&name=${encodeURIComponent(name)}&score=${score}`
+      + `&game=${encodeURIComponent(GAME_INFO[GAME].name)}`
+      + `&week=${WEEK}&month=${MONTH}&year=${YEAR}`;
+    try { await fetch(url); } catch {}
+  }
+  showLeaderboard();
+}
+
+function showLeaderboard() {
+  const card = document.getElementById('lb-card');
+  card.classList.remove('hidden');
+  card.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  loadLeaderboard(lbTab);
+}
+
+function switchTab(tab) {
+  lbTab = tab;
+  document.querySelectorAll('#tgame .lb-tab').forEach((el, i) =>
+    el.classList.toggle('active', (i===0 && tab==='weekly') || (i===1 && tab==='monthly')));
+  loadLeaderboard(tab);
+}
+
+async function loadLeaderboard(tab) {
+  const el = document.getElementById('lb-content');
+  if (APPS_SCRIPT_URL === 'YOUR_APPS_SCRIPT_URL_HERE') {
+    el.innerHTML = '<div class="lb-empty">Connect Google Sheets to see the shared leaderboard.</div>'; return;
+  }
+  el.innerHTML = '<div class="loading">Loading…</div>';
+  try {
+    const res  = await fetch(`${APPS_SCRIPT_URL}?action=leaderboard&week=${WEEK}&month=${MONTH}&year=${YEAR}`);
+    const data = await res.json();
+    renderLB(tab === 'weekly' ? data.weekly : data.monthly, tab);
+  } catch {
+    el.innerHTML = '<div class="lb-empty" style="color:#bf1650">Could not load — check the Apps Script URL.</div>';
+  }
+}
+
+function renderLB(rows, tab) {
+  const el = document.getElementById('lb-content');
+  if (!rows || rows.length === 0) {
+    el.innerHTML = `<div class="lb-empty">No scores yet this ${tab === 'weekly' ? 'week' : 'month'}.</div>`; return;
+  }
+  const medals = ['🥇','🥈','🥉'];
+  const me     = playerName.toLowerCase();
+  el.innerHTML = rows.map((r, i) => {
+    const isMe  = r.name.toLowerCase() === me;
+    const extra = tab === 'weekly' ? `<div class="lb-game">${r.game||''}</div>` : '';
+    return `<div class="lb-row">
+      <div class="lb-rank">${i < 3 ? medals[i] : (i+1)+'.'}</div>
+      <div class="lb-name ${isMe?'me':''}">${r.name}${isMe?' ★':''}</div>
+      ${extra}
+      <div class="lb-score">${r.score} pts</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════════════════
+// GAME 0 — DINO RUNNER
+// Score normalised: raw / 2, capped at 100.  Best run this week.
+// ════════════════════════════════════════════════════════════════
+const RW = 580, RH = 170;
+const GROUND   = 130;
+const PW = 26, PH = 32;
+const PX = 60;
+const GRAV = 0.6, JVEL = -13;
+const COL_BLUE = '#0052cc', COL_DIM = '#2684ff', COL_LIGHT = '#e8eeff';
+
+let RUN = {};
+
+function runnerHTML() {
+  weekBest = parseInt(localStorage.getItem(`tgame_runner_best_${WEEK}_${YEAR}`) || '0');
+  return `
+    <div class="run-meta">
+      <span>Score: <strong id="r-score">0</strong></span>
+      <span>Best this week: <strong id="r-best">${weekBest > 0 ? normScore(weekBest) + ' pts (raw ' + weekBest + ')' : '—'}</strong></span>
+    </div>
+    <canvas id="r-cv" width="${RW}" height="${RH}"></canvas>
+    <div class="run-hint">Space / ↑ / Tap to jump &nbsp;·&nbsp; Double jump allowed</div>
+    <div id="r-over" class="hidden score-panel">
+      <div class="score-num" id="r-final-pts">0</div>
+      <div class="score-lbl" id="r-final-lbl"></div>
+      <div class="btn-row">
+        <button class="btn btn-ghost" onclick="restartRunner()">▶ Play again</button>
+        <button class="btn btn-blue" id="r-submit-btn" onclick="runnerSubmit()">Submit best score</button>
+      </div>
+    </div>`;
+}
+
+function normScore(raw) { return Math.min(100, Math.round(raw / 2)); }
+
+function initRunner() {
+  const cv = document.getElementById('r-cv');
+  cv.addEventListener('click', doJump);
+  cv.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, { passive: false });
+  document.addEventListener('keydown', runnerKey);
+  startRunner();
+}
+
+function runnerKey(e) {
+  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
+}
+
+function startRunner() {
+  if (RUN.raf) cancelAnimationFrame(RUN.raf);
+  document.getElementById('r-over')?.classList.add('hidden');
+  RUN = {
+    frame: 0, score: 0, speed: 4.5, jumpsLeft: 2, obstacles: [],
+    player: { x: PX, y: GROUND - PH, vy: 0 },
+    raf: null, running: true,
+  };
+  RUN.raf = requestAnimationFrame(runTick);
+}
+
+function restartRunner() { startRunner(); }
+
+function doJump() {
+  if (RUN.jumpsLeft > 0) { RUN.player.vy = JVEL; RUN.jumpsLeft--; }
+}
+
+function runTick() {
+  if (!RUN.running) return;
+  RUN.frame++;
+  RUN.score = Math.floor(RUN.frame * 0.18);
+  RUN.speed = 4.5 + RUN.score * 0.004;
+  document.getElementById('r-score').textContent = RUN.score;
+
+  // Spawn obstacle
+  const gap = Math.max(46, 88 - Math.floor(RUN.score / 60) * 3);
+  if (RUN.frame % gap === 0) {
+    const h = 18 + Math.random() * 28, w = 13 + Math.random() * 10;
+    RUN.obstacles.push({ x: RW + 10, w, h, y: GROUND - h });
+  }
+
+  // Physics
+  RUN.player.vy += GRAV;
+  RUN.player.y  += RUN.player.vy;
+  if (RUN.player.y >= GROUND - PH) { RUN.player.y = GROUND - PH; RUN.player.vy = 0; RUN.jumpsLeft = 2; }
+
+  // Move & cull obstacles
+  for (let i = RUN.obstacles.length - 1; i >= 0; i--) {
+    RUN.obstacles[i].x -= RUN.speed;
+    if (RUN.obstacles[i].x + RUN.obstacles[i].w < 0) RUN.obstacles.splice(i, 1);
+  }
+
+  // Collision (shrunk hitbox)
+  for (const o of RUN.obstacles) {
+    if (RUN.player.x + PW - 8 > o.x + 4 &&
+        RUN.player.x + 8 < o.x + o.w - 4 &&
+        RUN.player.y + PH - 4 > o.y + 4) { runnerEnd(); return; }
+  }
+
+  runnerDraw();
+  RUN.raf = requestAnimationFrame(runTick);
+}
+
+function runnerDraw() {
+  const ctx = document.getElementById('r-cv').getContext('2d');
+  ctx.clearRect(0, 0, RW, RH);
+
+  // Score watermark
+  ctx.save();
+  ctx.fillStyle = COL_LIGHT;
+  ctx.font = 'bold 56px sans-serif';
+  ctx.textAlign = 'right';
+  ctx.fillText(RUN.score, RW - 14, 60);
+  ctx.restore();
+
+  // Ground
+  ctx.fillStyle = COL_LIGHT;
+  ctx.fillRect(0, GROUND, RW, 2);
+
+  // Dashed lines
+  ctx.save();
+  ctx.strokeStyle = COL_LIGHT;
+  ctx.lineWidth = 1;
+  ctx.setLineDash([16, 12]);
+  ctx.beginPath(); ctx.moveTo(0, GROUND + 12); ctx.lineTo(RW, GROUND + 12); ctx.stroke();
+  ctx.restore();
+
+  // Player body
+  ctx.fillStyle = COL_BLUE;
+  rrect(ctx, RUN.player.x, RUN.player.y, PW, PH, 6); ctx.fill();
+
+  // Eyes
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(RUN.player.x + 6,  RUN.player.y + 7,  5, 5);
+  ctx.fillRect(RUN.player.x + 15, RUN.player.y + 7,  5, 5);
+  // mouth
+  ctx.fillRect(RUN.player.x + 7,  RUN.player.y + 19, 12, 3);
+
+  // Legs
+  const airborne = RUN.player.vy !== 0;
+  const legOff   = airborne ? 0 : (Math.floor(RUN.frame / 5) % 2 === 0 ? 3 : -1);
+  ctx.fillStyle = COL_DIM;
+  ctx.fillRect(RUN.player.x + 4,  RUN.player.y + PH, 8, 6 + legOff);
+  ctx.fillRect(RUN.player.x + 14, RUN.player.y + PH, 8, 6 - legOff);
+
+  // Obstacles
+  RUN.obstacles.forEach(o => {
+    ctx.fillStyle = '#0018cc';
+    rrect(ctx, o.x, o.y, o.w, o.h, 4); ctx.fill();
+    ctx.fillStyle = COL_DIM;
+    ctx.fillRect(o.x + 3, o.y + 3, o.w - 6, 4);
+  });
+}
+
+function rrect(ctx, x, y, w, h, r) {
+  ctx.beginPath();
+  ctx.moveTo(x+r,y); ctx.lineTo(x+w-r,y); ctx.quadraticCurveTo(x+w,y,x+w,y+r);
+  ctx.lineTo(x+w,y+h-r); ctx.quadraticCurveTo(x+w,y+h,x+w-r,y+h);
+  ctx.lineTo(x+r,y+h); ctx.quadraticCurveTo(x,y+h,x,y+h-r);
+  ctx.lineTo(x,y+r); ctx.quadraticCurveTo(x,y,x+r,y); ctx.closePath();
+}
+
+async function runnerEnd() {
+  RUN.running = false;
+  cancelAnimationFrame(RUN.raf);
+  document.removeEventListener('keydown', runnerKey);
+
+  const raw = RUN.score;
+  const pts = normScore(raw);
+
+  // Save best locally
+  if (raw > weekBest) {
+    weekBest = raw;
+    localStorage.setItem(`tgame_runner_best_${WEEK}_${YEAR}`, raw);
+    document.getElementById('r-best').textContent = `${pts} pts (raw ${raw}) ⭐ new best!`;
+  }
+
+  // Auto-submit to backend (backend keeps highest)
+  if (APPS_SCRIPT_URL !== 'YOUR_APPS_SCRIPT_URL_HERE') {
+    const name = playerName || 'Anonymous';
+    const url  = `${APPS_SCRIPT_URL}?action=submit`
+      + `&name=${encodeURIComponent(name)}&score=${pts}`
+      + `&game=${encodeURIComponent(GAME_INFO[0].name)}`
+      + `&week=${WEEK}&month=${MONTH}&year=${YEAR}`;
+    try { await fetch(url); } catch {}
+  }
+
+  document.getElementById('r-final-pts').textContent = pts;
+  document.getElementById('r-final-lbl').textContent = `pts  ·  raw score ${raw}  ·  best this week: ${normScore(weekBest)} pts`;
+  document.getElementById('r-over').classList.remove('hidden');
+}
+
+function runnerSubmit() {
+  document.addEventListener('keydown', runnerKey);
+  showLeaderboard();
+}
+
+// ════════════════════════════════════════════════════════════════
+// GAME 1 — MEMORY MATCH
+// ════════════════════════════════════════════════════════════════
+const MEM_EMOJI = ['💻','📊','📈','☕','📧','🔔','💡','📁'];
+let M = {};
+
+function memoryHTML() {
+  return `<div class="memory-grid" id="m-grid"></div>
+    <div class="mem-stats">
+      <div class="stat" id="m-time">⏱ 0s</div>
+      <div class="stat" id="m-flips">🖱 0 flips</div>
+      <div class="stat" id="m-pairs">✅ 0 / 8</div>
+    </div>
+    <div class="hidden score-panel" id="m-result"></div>`;
+}
+
+function initMemory() {
+  const cards = [...MEM_EMOJI, ...MEM_EMOJI].sort(() => Math.random()-0.5)
+    .map((e,i) => ({ id:i, emoji:e, flipped:false, matched:false }));
+  M = { cards, open:[], matched:0, flips:0, start:null, ticker:null, locked:false };
+  drawMem();
+}
+
+function drawMem() {
+  document.getElementById('m-grid').innerHTML = M.cards.map((c,i) => `
+    <div class="mc ${c.flipped||c.matched?'flipped':''} ${c.matched?'matched':''}" onclick="flipMem(${i})">
+      <div class="mc-inner"><div class="mc-front">?</div><div class="mc-back">${c.emoji}</div></div>
+    </div>`).join('');
+}
+
+function flipMem(i) {
+  if (M.locked || M.cards[i].flipped || M.cards[i].matched) return;
+  if (!M.start) {
+    M.start  = Date.now();
+    M.ticker = setInterval(() => {
+      document.getElementById('m-time').textContent = `⏱ ${Math.round((Date.now()-M.start)/1000)}s`;
+    }, 500);
+  }
+  M.cards[i].flipped = true; M.open.push(i); M.flips++;
+  document.getElementById('m-flips').textContent = `🖱 ${M.flips} flips`;
+  drawMem();
+  if (M.open.length === 2) {
+    M.locked = true;
+    const [a,b] = M.open;
+    if (M.cards[a].emoji === M.cards[b].emoji) {
+      M.cards[a].matched = M.cards[b].matched = true;
+      M.cards[a].flipped = M.cards[b].flipped = false;
+      M.open = []; M.locked = false; M.matched++;
+      document.getElementById('m-pairs').textContent = `✅ ${M.matched} / 8`;
+      drawMem();
+      if (M.matched === 8) finishMemory();
+    } else {
+      setTimeout(() => {
+        M.cards[a].flipped = M.cards[b].flipped = false;
+        M.open = []; M.locked = false; drawMem();
+      }, 850);
+    }
+  }
+}
+
+function finishMemory() {
+  clearInterval(M.ticker);
+  const elapsed    = Math.round((Date.now()-M.start)/1000);
+  const extraFlips = Math.max(0, M.flips - MEM_EMOJI.length*2);
+  const score      = Math.max(0, Math.round(100 - Math.min(60,elapsed) - extraFlips*3));
+  const el = document.getElementById('m-result');
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="score-num">${score}</div>
+    <div class="score-lbl">pts &nbsp;·&nbsp; ${elapsed}s &nbsp;·&nbsp; ${M.flips} flips</div>
+    <div class="btn-row"><button class="btn btn-blue" onclick="submitScore(${score})">Submit score 🏆</button></div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// GAME 2 — MATH BLITZ
+// ════════════════════════════════════════════════════════════════
+let MA = {};
+
+function mathHTML() {
+  return `<div class="math-bar-wrap"><div class="math-bar" id="ma-bar" style="width:100%"></div></div>
+    <div class="math-counter" id="ma-ctr">⏱ 60s &nbsp;·&nbsp; ✅ 0 correct</div>
+    <div class="math-q" id="ma-q">Ready?</div>
+    <input type="number" class="math-input" id="ma-inp" placeholder="?" autocomplete="off" inputmode="numeric" />
+    <div class="math-fb" id="ma-fb"></div>
+    <div class="hidden score-panel" id="ma-result"></div>
+    <div class="btn-row"><button class="btn btn-blue" id="ma-start" onclick="startMath()">▶ Start</button></div>`;
+}
+
+function ri(a,b) { return Math.floor(Math.random()*(b-a+1))+a; }
+function genQ() {
+  const op = ['+','-','*'][ri(0,2)];
+  let a,b,answer;
+  if (op==='+') { a=ri(5,50);  b=ri(5,50);  answer=a+b; }
+  if (op==='-') { a=ri(20,99); b=ri(5,a);   answer=a-b; }
+  if (op==='*') { a=ri(2,12);  b=ri(2,12);  answer=a*b; }
+  return { text:`${a} ${op} ${b} = ?`, answer };
+}
+
+function initMath() {
+  document.getElementById('ma-inp').addEventListener('keydown', e => {
+    if (e.key === 'Enter') checkMath();
+  });
+}
+
+function startMath() {
+  document.getElementById('ma-start').closest('.btn-row').remove();
+  MA = { correct:0, timeLeft:60, q:genQ() };
+  document.getElementById('ma-q').textContent = MA.q.text;
+  document.getElementById('ma-inp').focus();
+  MA.interval = setInterval(() => {
+    MA.timeLeft = Math.max(0, MA.timeLeft - 0.1);
+    const pct = (MA.timeLeft/60)*100;
+    const bar = document.getElementById('ma-bar');
+    bar.style.width      = pct+'%';
+    bar.style.background = pct<25 ? '#ff5630' : pct<50 ? '#ff8b00' : '#0052cc';
+    document.getElementById('ma-ctr').textContent =
+      `⏱ ${Math.ceil(MA.timeLeft)}s · ✅ ${MA.correct} correct`;
+    if (MA.timeLeft <= 0) { clearInterval(MA.interval); finishMath(); }
+  }, 100);
+}
+
+function checkMath() {
+  const inp = document.getElementById('ma-inp');
+  const val = parseInt(inp.value,10);
+  if (isNaN(val)) return;
+  const fb = document.getElementById('ma-fb');
+  if (val === MA.q.answer) {
+    MA.correct++; fb.textContent='✓ Correct!'; fb.className='math-fb ok';
+  } else {
+    fb.textContent=`✗ ${MA.q.answer}`; fb.className='math-fb err';
+  }
+  setTimeout(() => { fb.textContent=''; }, 650);
+  MA.q = genQ();
+  document.getElementById('ma-q').textContent = MA.q.text;
+  inp.value=''; inp.focus();
+}
+
+function finishMath() {
+  document.getElementById('ma-inp').disabled = true;
+  const score = Math.min(100, Math.round((MA.correct/20)*100));
+  const el = document.getElementById('ma-result');
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="score-num">${score}</div>
+    <div class="score-lbl">pts &nbsp;·&nbsp; ${MA.correct} correct answers</div>
+    <div class="btn-row"><button class="btn btn-blue" onclick="submitScore(${score})">Submit score 🏆</button></div>`;
+}
+
+// ════════════════════════════════════════════════════════════════
+// GAME 3 — REACTION TIME
+// ════════════════════════════════════════════════════════════════
+const RX_ROUNDS = 5;
+let RX = {};
+
+function reactionHTML() {
+  return `<div class="rx-dots" id="rx-dots">
+      ${Array(RX_ROUNDS).fill('<div class="rx-dot"></div>').join('')}
+    </div>
+    <div class="rx-circle idle" id="rx-circle" onclick="rxClick()">Click to start</div>
+    <div class="rx-result" id="rx-result"></div>
+    <div class="hidden score-panel" id="rx-final"></div>`;
+}
+
+function initReaction() { RX = { round:0, times:[], phase:'idle', t:null }; }
+
+function rxClick() {
+  const circle = document.getElementById('rx-circle');
+  if (RX.phase === 'idle') {
+    RX.phase = 'waiting';
+    circle.className = 'rx-circle waiting';
+    circle.textContent = 'Wait…';
+    RX.t = setTimeout(() => {
+      RX.phase = 'go'; RX.startTime = Date.now();
+      circle.className = 'rx-circle go'; circle.textContent = 'NOW!';
+    }, 1000 + Math.random()*3000);
+
+  } else if (RX.phase === 'waiting') {
+    clearTimeout(RX.t);
+    document.getElementById('rx-result').textContent = '⚠️ Too soon — try again';
+    circle.className = 'rx-circle idle'; circle.textContent = 'Click to retry'; RX.phase = 'idle';
+
+  } else if (RX.phase === 'go') {
+    const elapsed = Date.now() - RX.startTime;
+    RX.times.push(elapsed); RX.round++;
+    document.getElementById('rx-result').textContent = `Round ${RX.round}: ${elapsed} ms`;
+    document.querySelectorAll('#tgame .rx-dot').forEach((d,i) =>
+      d.className = 'rx-dot'+(i<RX.round?' done':i===RX.round?' active':''));
+    if (RX.round >= RX_ROUNDS) { finishReaction(); }
+    else { circle.className='rx-circle idle'; circle.textContent='Click to continue'; RX.phase='idle'; }
+  }
+}
+
+function finishReaction() {
+  document.getElementById('rx-circle').className = 'rx-circle done';
+  document.getElementById('rx-circle').textContent = '✓ Done';
+  RX.phase = 'done';
+  const avg   = Math.round(RX.times.reduce((s,t)=>s+t,0)/RX.times.length);
+  const score = Math.max(0, Math.min(100, Math.round((800-avg)/650*100)));
+  const el = document.getElementById('rx-final');
+  el.classList.remove('hidden');
+  el.innerHTML = `<div class="score-num">${score}</div>
+    <div class="score-lbl">pts &nbsp;·&nbsp; avg ${avg} ms reaction time</div>
+    <div class="btn-row"><button class="btn btn-blue" onclick="submitScore(${score})">Submit score 🏆</button></div>`;
+}
+</script>
+</body>
+</html>
