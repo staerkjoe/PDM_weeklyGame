@@ -449,7 +449,7 @@ async function loadLeaderboard(tab) {
     const data = await res.json();
     renderLB(tab === 'weekly' ? data.weekly : data.monthly, tab);
   } catch {
-    el.innerHTML = '<div class="lb-empty" style="color:#bf1650">Could not load — check the Apps Script URL.</div>';
+    el.innerHTML = '<div class="lb-empty" style="color:#bf1650;line-height:1.6">Could not load leaderboard.<br><span style="font-size:0.8rem;color:#6b778c">In Google Apps Script: <strong>Deploy → Manage deployments → Edit → Who has access: Anyone</strong> (not requiring Google login), then save a new version.</span></div>';
   }
 }
 
@@ -483,7 +483,30 @@ const PX = 60;
 const GRAV = 0.6, JVEL = -13;
 const COL_BLUE = '#0052cc', COL_DIM = '#2684ff', COL_LIGHT = '#e8eeff';
 
-let RUN = {};
+let RUN = { started: false };
+
+function drawRunnerIdle() {
+  const cv = document.getElementById('r-cv');
+  if (!cv) return;
+  const ctx = cv.getContext('2d');
+  ctx.clearRect(0, 0, RW, RH);
+  // Ground
+  ctx.fillStyle = COL_LIGHT; ctx.fillRect(0, GROUND, RW, 2);
+  ctx.save(); ctx.strokeStyle = COL_LIGHT; ctx.lineWidth = 1; ctx.setLineDash([16,12]);
+  ctx.beginPath(); ctx.moveTo(0, GROUND+12); ctx.lineTo(RW, GROUND+12); ctx.stroke(); ctx.restore();
+  // Player (static)
+  ctx.fillStyle = COL_BLUE; rrect(ctx, PX, GROUND-PH, PW, PH, 6); ctx.fill();
+  ctx.fillStyle = '#fff';
+  ctx.fillRect(PX+6, GROUND-PH+7, 5, 5); ctx.fillRect(PX+15, GROUND-PH+7, 5, 5);
+  ctx.fillRect(PX+7, GROUND-PH+19, 12, 3);
+  // "Click to start" text
+  ctx.save(); ctx.textAlign = 'center';
+  ctx.fillStyle = '#0052cc'; ctx.font = 'bold 18px sans-serif';
+  ctx.fillText('▶  Click here or press Space to start', RW/2, RH/2 - 6);
+  ctx.fillStyle = '#9aa5bc'; ctx.font = '13px sans-serif';
+  ctx.fillText('Double jump allowed', RW/2, RH/2 + 18);
+  ctx.restore();
+}
 
 function runnerHTML() {
   weekBest = parseInt(localStorage.getItem(`tgame_runner_best_${WEEK}_${YEAR}`) || '0');
@@ -498,7 +521,7 @@ function runnerHTML() {
       <div class="score-num" id="r-final-pts">0</div>
       <div class="score-lbl" id="r-final-lbl"></div>
       <div class="btn-row">
-        <button class="btn btn-ghost" onclick="restartRunner()">▶ Play again</button>
+        <button class="btn btn-ghost" onclick="startRunner()">▶ Play again</button>
         <button class="btn btn-blue" id="r-submit-btn" onclick="runnerSubmit()">Submit best score</button>
       </div>
     </div>`;
@@ -508,28 +531,35 @@ function normScore(raw) { return Math.min(100, Math.round(raw / 2)); }
 
 function initRunner() {
   const cv = document.getElementById('r-cv');
-  cv.addEventListener('click', doJump);
-  cv.addEventListener('touchstart', e => { e.preventDefault(); doJump(); }, { passive: false });
+  cv.addEventListener('click', runnerInteract);
+  cv.addEventListener('touchstart', e => { e.preventDefault(); runnerInteract(); }, { passive: false });
   document.addEventListener('keydown', runnerKey);
-  startRunner();
+  drawRunnerIdle();
+}
+
+function runnerInteract() {
+  if (!RUN.started) { startRunner(); } else { doJump(); }
 }
 
 function runnerKey(e) {
-  if (e.code === 'Space' || e.code === 'ArrowUp') { e.preventDefault(); doJump(); }
+  if (e.code === 'Space' || e.code === 'ArrowUp') {
+    e.preventDefault();
+    if (!RUN.started) { startRunner(); } else { doJump(); }
+  }
 }
 
 function startRunner() {
   if (RUN.raf) cancelAnimationFrame(RUN.raf);
   document.getElementById('r-over')?.classList.add('hidden');
   RUN = {
-    frame: 0, score: 0, speed: 4.5, jumpsLeft: 2, obstacles: [],
+    started: true, frame: 0, score: 0, speed: 4.5, jumpsLeft: 2, obstacles: [],
     player: { x: PX, y: GROUND - PH, vy: 0 },
     raf: null, running: true,
   };
   RUN.raf = requestAnimationFrame(runTick);
 }
 
-function restartRunner() { startRunner(); }
+function restartRunner() { RUN = { started: false }; drawRunnerIdle(); }
 
 function doJump() {
   if (RUN.jumpsLeft > 0) { RUN.player.vy = JVEL; RUN.jumpsLeft--; }
